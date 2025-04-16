@@ -1,7 +1,7 @@
 #Example Flask App for a hexaganal tile game
 #Logic is in this python file
 
-from flask import Flask, render_template, redirect, url_for, session
+from flask import Flask, render_template, redirect, url_for, flash, session
 import random
 
 app = Flask(__name__)
@@ -35,6 +35,15 @@ def index():
                            turn=session['turn'],
                            current_player=PLAYERS[session['turn'] % 4],
                            winner=session['winner'])
+    if 'events' not in session:
+        session['events'] = []
+    return render_template('index.html',
+                       board=session['board'],
+                       players=session['players'],
+                       turn=session['turn'],
+                       current_player=PLAYERS[session['turn'] % 4],
+                       winner=session['winner'],
+                       events=session['events'])
 
 @app.route('/draw')
 def draw_card():
@@ -46,30 +55,44 @@ def draw_card():
     position = session['players'][current_player]
     board = session['board']
 
+    event_log = session.get('events', [])
+    log_message = ""
+
     # Try to find the next tile of the drawn color
     moved = False
     for i in range(position + 1, len(board)):
         if board[i] == card_color:
             session['players'][current_player] = i
             moved = True
+            log_message = f"{current_player} drew {card_color.upper()} and moved to tile {i}."
             break
 
-    # If no tile found, move to 'end' and win
     if not moved:
-        session['players'][current_player] = len(board) - 1  # index of 'end'
+        session['players'][current_player] = len(board) - 1
         session['winner'] = current_player
+        log_message = f"{current_player} drew {card_color.upper()}, but no {card_color} tile ahead — moved to END and won!"
 
-    # If landed on end tile by matching color, mark as winner too
-    if session['players'][current_player] == len(board) - 1:
+    if session['players'][current_player] == len(board) - 1 and not session.get('winner'):
         session['winner'] = current_player
+        log_message = f"{current_player} landed on the END and won!"
 
+    event_log.append(log_message)
+    session['events'] = event_log
     session['turn'] += 1
+
+    # Save log entry to file
+    with open('game_log.txt', 'a') as f:
+        f.write(log_message + '\n')
+
     return redirect(url_for('index'))
+
 
 
 @app.route('/reset')
 def reset_game():
     session.clear()
+    with open('game_log.txt', 'w') as f:
+        f.write('--- Game Reset ---\n')
     return redirect(url_for('index'))
 
 if __name__ == '__main__':

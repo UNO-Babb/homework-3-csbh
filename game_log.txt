@@ -1,0 +1,11 @@
+--- Game Reset ---
+player1 drew ORANGE and moved to tile 2.
+player2 drew PURPLE and moved to tile 3.
+player3 drew GREEN and moved to tile 1.
+player4 drew PURPLE and moved to tile 3.
+player1 drew GREEN and moved to tile 5.
+player2 drew GREEN and moved to tile 5.
+player3 drew PURPLE and moved to tile 3.
+player4 drew PURPLE and moved to tile 7.
+player1 drew ORANGE and moved to tile 6.
+player2 drew GREEN and moved to tile 9.
