@@ -1,61 +1,64 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hexagon Tile Game</title>
+    <title>Geometry City</title>
     <style>
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
-        }
-        #board {
+        .board {
             display: grid;
             grid-template-columns: repeat(10, 60px);
-            grid-template-rows: repeat(10, 52px);
-            gap: 2px;
+            gap: 5px;
+            margin-bottom: 20px;
         }
-        .hex {
+        .tile {
             width: 60px;
-            height: 52px;
-            background-color: lightgray;
-            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
-            transition: background-color 0.2s;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #ccc;
+            font-size: 12px;
+            text-align: center;
+        }
+        .green { background-color: lightgreen; }
+        .orange { background-color: orange; }
+        .purple { background-color: plum; }
+        .red { background-color: lightcoral; }
+        .start { background-color: lightblue; }
+        .end { background-color: gold; }
+        .players {
+            font-size: 10px;
         }
     </style>
 </head>
 <body>
-
-<div id="board">
-    <!-- Hexagonal tiles will be added here on clicks -->
-</div>
-
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
-    $(document).ready(function() {
-        // Create an empty board of hex tiles
-        for (let i = 0; i < 100; i++) {
-            const hexTile = $('<div class="hex"></div>');
-            hexTile.data("clicked", false);  // Track if a tile has been clicked
-            $('#board').append(hexTile);
-        }
-
-        // Add color to hex tiles on click
-        $('#board').on('click', '.hex', function() {
-            if (!$(this).data("clicked")) {  // Only allow one click per tile
-                $.getJSON('/add_tile', function(data) {
-                    $(this).css('background-color', data.color);
-                    $(this).data("clicked", true);  // Mark as clicked
-                }.bind(this));
-            }
-        });
-    });
-</script>
-
+    <h1>Geometry City</h1>
+    {% if winner %}
+        <h2>{{ winner }} wins!</h2>
+    {% else %}
+        <h2>Current Turn: {{ current_player }}</h2>
+    {% endif %}
+    <div class="board">
+        {% for tile in board %}
+        {% set i = loop.index0 %}
+            <div class="tile {{ tile }}">
+                {{ tile.upper() }}
+                <div class="players">
+                    {% for player, pos in players.items() %}
+                        {% if pos == i %}
+                            <div>{{ player[-1] }}</div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    {% if not winner %}
+        <form action="{{ url_for('draw_card') }}">
+            <button type="submit">Draw Card</button>
+        </form>
+    {% endif %}
+    <form action="{{ url_for('reset_game') }}">
+        <button type="submit">Reset Game</button>
+    </form>
 </body>
 </html>
