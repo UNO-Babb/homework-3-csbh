@@ -1,6 +1,8 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Geometry City</title>
     <style>
         .board {
@@ -18,6 +20,7 @@
             border: 1px solid #ccc;
             font-size: 12px;
             text-align: center;
+            position: relative;
         }
         .green { background-color: lightgreen; }
         .orange { background-color: orange; }
@@ -26,37 +29,49 @@
         .start { background-color: lightblue; }
         .end { background-color: gold; }
         .players {
-            font-size: 10px;
+            font-size: 14px;
+            position: absolute;
         }
     </style>
 </head>
 <body>
     <h1>Geometry City</h1>
+    
     {% if winner %}
         <h2>{{ winner }} wins!</h2>
     {% else %}
-        <h2>Current Turn: {{ current_player }}</h2>
+        <h2>Current Turn: {{ current_player }} ({{ current_player_shape }})</h2>
     {% endif %}
+    
     <div class="board">
         {% for tile in board %}
-        {% set i = loop.index0 %}
+            {% set i = loop.index0 %}
             <div class="tile {{ tile }}">
-                {{ tile.upper() }}
+                {% if tile == 'start' %}
+                    Start
+                {% elif tile == 'end' %}
+                    End
+                {% else %}
+                    <!-- No label for other tiles -->
+                {% endif %}
                 <div class="players">
-                    {% for player, pos in players.items() %}
-                        {% if pos == i %}
-                            <div>{{ player[-1] }}</div>
+                    {% for player, data in players.items() %}
+                        {% if data['position'] == i %}
+                            <!-- Only display the player's shape, no name -->
+                            <div>{{ data['shape'] }}</div>
                         {% endif %}
                     {% endfor %}
                 </div>
             </div>
         {% endfor %}
     </div>
+    
     {% if not winner %}
         <form action="{{ url_for('draw_card') }}">
             <button type="submit">Draw Card</button>
         </form>
     {% endif %}
+    
     <form action="{{ url_for('reset_game') }}">
         <button type="submit">Reset Game</button>
     </form>
